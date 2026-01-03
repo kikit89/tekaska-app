@@ -3,373 +3,271 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob: 'unsafe-inline'; frame-src *; style-src * 'unsafe-inline';">
-    <title>Moj Planer</title>
+    <title>Moj Planer 6.3.1</title>
     <style>
         /* --- 1. OSNOVA --- */
-        :root { --bg: #f4f7f6; --white: #fff; --grey: #bdc3c7; --dark: #2c3e50; --green: #27ae60; --red: #c0392b; --orange: #e67e22; }
-        
+        :root { --bg: #f4f7f6; --white: #fff; --grey: #bdc3c7; --dark: #2c3e50; --green: #27ae60; --red: #c0392b; --orange: #e67e22; --purple: #8e44ad; --blue: #3498db; }
         html { height: 100%; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg); margin: 0; padding: 0; padding-bottom: 75px; 
-            min-height: 100%; color: #333; 
-            -webkit-user-select: none; user-select: none;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: var(--bg); margin: 0; padding: 0; padding-bottom: 75px; min-height: 100%; color: #333; -webkit-user-select: none; user-select: none; }
         
-        /* HEADER */
         .header-row { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--bg); }
         h1 { margin: 0; color: var(--dark); font-size: 1.4rem; text-transform: uppercase; letter-spacing: 1px; }
         .view-btn { background: white; border: 1px solid #ddd; padding: 8px 12px; border-radius: 8px; font-size: 1.2rem; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
-
-        /* NAVIGACIJA */
+        
         .nav-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: var(--white); border-top: 1px solid #ddd; display: flex; justify-content: space-around; padding: 10px 0; z-index: 1000; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; flex: 1; color: #95a5a6; font-size: 0.7rem; display: flex; flex-direction: column; align-items: center; }
         .nav-item.active { color: var(--dark); font-weight: bold; }
         .nav-icon { font-size: 1.4rem; margin-bottom: 2px; }
-
-        /* STRANI */
         .page { display: none; padding: 10px; animation: fadeIn 0.2s; }
         .page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        /* --- 4. KOLEDAR --- */
-        .calendar-wrap { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; transition: all 0.3s ease; }
-
-        /* GRID MODE */
-        .mode-grid .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); background: #f8f9fa; border-bottom: 1px solid #eee; }
-        .mode-grid .day-name { text-align: center; font-weight: bold; padding: 8px 0; font-size: 0.7rem; color: #7f8c8d; }
-        .mode-grid .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); background: #eee; gap: 1px; }
-        .mode-grid .day-cell { background: var(--white); min-height: 85px; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; padding-top: 24px; overflow: hidden; }
-        .mode-grid .day-num { position: absolute; top: 4px; left: 4px; font-weight: bold; color: #bdc3c7; font-size: 0.8rem; }
-        .mode-grid .dots-wrap { display: flex; flex-direction: column; gap: 2px; width: 100%; padding-left: 1px; }
-        .mode-grid .dot-row { display: flex; align-items: center; gap: 2px; height: 11px; width: 100%; }
-        .mode-grid .dot { flex-shrink: 0; width: 8px; height: 8px; border-radius: 50%; }
-        .mode-grid .val-text { font-size: 0.55rem; font-weight: bold; white-space: nowrap; letter-spacing: -0.5px; overflow: hidden; }
-
-        /* LIST MODE */
-        .mode-list .calendar-header { display: none; } 
-        .mode-list .calendar-body { display: flex; flex-direction: column; background: #eee; gap: 1px; }
-        .mode-list .day-cell { background: white; padding: 15px; position: relative; cursor: pointer; display: flex; flex-direction: row; align-items: center; justify-content: space-between; min-height: 50px; }
-        .mode-list .day-num { position: static; font-size: 1.1rem; font-weight: bold; color: var(--dark); width: 50px; text-align: center; margin-right: 15px; display: flex; flex-direction: column; line-height: 1.2; }
-        .mode-list .day-weekday { font-size: 0.7rem; color: #95a5a6; text-transform: uppercase; font-weight: normal; }
-        .mode-list .dots-wrap { display: flex; flex-direction: column; gap: 6px; flex: 1; }
-        .mode-list .dot-row { display: flex; align-items: center; gap: 8px; }
-        .mode-list .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .mode-list .val-text { font-size: 0.9rem; font-weight: bold; color: #333; }
-        .mode-list .goal-label { font-size: 0.75rem; color: #7f8c8d; font-weight: normal; margin-right: auto; }
-
-        .is-today { background-color: #fff8e1 !important; }
-        .is-today .day-num { color: #e67e22 !important; text-decoration: none; }
-        .mode-grid .is-today .day-num { text-decoration: underline; }
-
-        /* PROGRESS BARS */
-        .progress-section { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-        .sec-title { text-align: center; font-weight: bold; color: var(--dark); margin-bottom: 15px; font-size: 1rem; }
-        .bar-group { margin-bottom: 12px; }
-        .bar-header { display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: bold; color: #555; margin-bottom: 3px; }
-        .bar-track { background: #ecf0f1; height: 8px; border-radius: 4px; position: relative; overflow: hidden; }
-        .bar-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
-        .bar-marker { position: absolute; top: 0; bottom: 0; width: 2px; background: rgba(0,0,0,0.6); border-right: 1px dotted white; z-index: 5; }
-        .bar-status { text-align: right; font-size: 0.7rem; margin-top: 2px; font-weight: bold; }
+        /* KOLEDAR */
+        .calendar-wrap { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .calendar-header { display: grid; grid-template-columns: repeat(7, 1fr); background: #f8f9fa; border-bottom: 1px solid #eee; }
+        .day-name { text-align: center; font-weight: bold; padding: 8px 0; font-size: 0.7rem; color: #7f8c8d; }
+        .calendar-body { display: grid; grid-template-columns: repeat(7, 1fr); background: #eee; gap: 1px; }
+        .day-cell { background: var(--white); min-height: 85px; position: relative; cursor: pointer; display: flex; flex-direction: column; align-items: center; padding-top: 24px; overflow: hidden; }
+        .day-num { position: absolute; top: 4px; left: 4px; font-weight: bold; color: #bdc3c7; font-size: 0.8rem; }
         
-        .txt-green { color: var(--green) !important; } .txt-red { color: var(--red) !important; } .txt-orange { color: var(--orange) !important; }
+        /* LIST VIEW SPECIFICS */
+        .mode-list .calendar-header { display: none; }
+        .mode-list .calendar-body { display: flex; flex-direction: column; }
+        .mode-list .day-cell { flex-direction: row; padding: 15px; min-height: auto; align-items: flex-start; }
+        .day-left-col { width: 50px; border-right: 1px solid #eee; margin-right: 10px; }
+        .day-weekday { font-size: 0.6rem; color: #999; }
 
-        /* MODAL */
-        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(2px); }
-        .modal-box { background: white; width: 85%; max-width: 300px; padding: 20px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); display: flex; flex-direction: column; }
-        .inp-group label { display: block; font-weight: bold; margin-bottom: 5px; color: #555; font-size: 0.9rem; }
-        .inp-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 1.1rem; box-sizing: border-box; outline: none; margin-bottom: 10px; }
-        .modal-btns { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 8px; font-size: 1rem; font-weight: bold; cursor: pointer; text-align: center; }
+        .dots-wrap { display: flex; flex-direction: column; gap: 2px; width: 100%; }
+        .dot-row, .list-row { display: flex; align-items: center; gap: 5px; font-size: 0.75rem; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid transparent; }
         
-        /* BACKUP TEXTAREA */
-        .backup-text { width: 100%; height: 150px; font-family: monospace; font-size: 0.8rem; border: 1px solid #ccc; border-radius: 5px; padding: 5px; box-sizing: border-box; margin-bottom: 10px; -webkit-user-select: text; user-select: text; }
+        /* PROGRESS & UI */
+        .progress-section { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 15px; }
+        .sec-title { text-align: center; font-weight: bold; margin-bottom: 15px; }
+        .bar-group { margin-bottom: 10px; }
+        .bar-track { background: #eee; height: 8px; border-radius: 4px; position: relative; margin: 5px 0; }
+        .bar-fill { height: 100%; border-radius: 4px; }
+        .bar-marker { position: absolute; top: 0; width: 2px; height: 100%; background: #000; }
+        
+        .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .stat-card { background: white; padding: 15px; border-radius: 12px; text-align: center; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
 
-        /* NASTAVITVE */
-        .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
-        .switch { position: relative; display: inline-block; width: 46px; height: 24px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--green); }
-        input:checked + .slider:before { transform: translateX(22px); }
-        .backup-area { background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 20px; font-size: 0.8rem; border: 1px dashed #ccc; }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-box { background: white; width: 85%; padding: 20px; border-radius: 15px; }
+        .inp-group { margin-bottom: 10px; }
+        .inp-group input, .inp-group select { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
+        .modal-btns { display: flex; gap: 10px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; }
+
+        .type-selector { display: flex; gap: 5px; margin-bottom: 15px; }
+        .type-opt { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 8px; text-align: center; font-size: 1.2rem; }
+        .type-opt.selected { background: #e8f5e9; border-color: var(--green); }
+        
+        .goal-list-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; }
+        .backup-area { background: #fff3cd; padding: 15px; border-radius: 8px; text-align: center; }
     </style>
 </head>
 <body>
 
     <div id="tab-calendar" class="page active">
-        <div class="header-row">
-            <h1 id="calendarTitle">JANUAR 2026</h1>
-            <button class="view-btn" onclick="toggleViewMode()" id="viewBtn">📜</button>
-        </div>
-        <div class="calendar-wrap mode-grid" id="calendarWrap">
+        <div class="header-row"><h1>Koledar</h1><button class="view-btn" onclick="toggleViewMode()" id="viewBtn">📜</button></div>
+        <div id="calendarWrap" class="calendar-wrap mode-grid">
             <div class="calendar-header"><div class="day-name">PO</div><div class="day-name">TO</div><div class="day-name">SR</div><div class="day-name">ČE</div><div class="day-name">PE</div><div class="day-name">SO</div><div class="day-name">NE</div></div>
-            <div class="calendar-body" id="calendarBody"></div>
+            <div id="calendarBody" class="calendar-body"></div>
         </div>
-        <div class="progress-section" id="progressSection"></div>
+        <div id="progressSection" class="progress-section"></div>
+    </div>
+
+    <div id="tab-analytics" class="page">
+        <div class="header-row"><h1>Analiza</h1></div>
+        <div class="stat-grid">
+            <div class="stat-card"><span id="statMaxDist" class="stat-val">0.0 km</span><br><small>Najdaljši tek</small></div>
+            <div class="stat-card"><span id="statMaxElev" class="stat-val">0 m</span><br><small>Največ višincev</small></div>
+        </div>
+        <div class="progress-section" style="margin-top:15px;">
+            <div class="sec-title">Razmerje Aktivnosti</div>
+            <div style="display:flex; justify-content:center;"><div id="activityPie" style="width:150px; height:150px; border-radius:50%;"></div></div>
+        </div>
     </div>
 
     <div id="tab-races" class="page">
-        <div class="header-row"><h1>Koledar Tekem 🏆</h1></div>
-        <div style="background:white; border-radius:12px; height:600px; box-shadow:0 2px 10px rgba(0,0,0,0.05); overflow:hidden;">
-            <iframe src="https://calendar.google.com/calendar/embed?src=ebc83d7c094e5c61db2b0682a4da13734af4f2f381bafec7ccb37df56bdb1c92@group.calendar.google.com&ctz=Europe%2FLjubljana&color=%2342d692&showTitle=0&showNav=1&showDate=1&showPrint=0&showTabs=0&showCalendars=0" style="border:0" width="100%" height="100%" frameborder="0" scrolling="no"></iframe>
-        </div>
+        <div class="header-row"><h1>Tekme</h1></div>
+        <div id="myRacesList" class="progress-section"></div>
+        <button class="btn" style="background:var(--green); color:white; width:100%;" onclick="openRaceModal()">➕ Dodaj tekmo</button>
     </div>
 
     <div id="tab-settings" class="page">
-        <div class="header-row"><h1>Nastavitve ⚙️</h1></div>
-        <div class="progress-section">
-            <div id="settingsList"></div>
-            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
-            <div class="setting-item"><span style="color:#555">Mesečna razčlenitev</span><label class="switch"><input type="checkbox" id="toggleSubMonth" onchange="toggleGlobal('subMonth')"><span class="slider"></span></label></div>
-            <div class="setting-item"><span style="color:#555">Tedenska razčlenitev</span><label class="switch"><input type="checkbox" id="toggleSubWeek" onchange="toggleGlobal('subWeek')"><span class="slider"></span></label></div>
-            <div class="backup-area">
-                <p><strong>Varnostna kopija:</strong></p>
-                <button class="btn" style="background:#3498db; color:white; padding:8px;" onclick="openBackupModal('export')">📋 Izvozi podatke</button>
-                <button class="btn" style="background:#e67e22; color:white; padding:8px; margin-top:5px;" onclick="openBackupModal('import')">📥 Uvozi podatke</button>
-            </div>
+        <div class="header-row"><h1>Nastavitve</h1></div>
+        <div class="backup-area">
+            <button class="btn" style="background:var(--blue); color:white; width:100%; margin-bottom:10px;" onclick="downloadBackup()">📥 Shrani na telefon (Backup)</button>
+            <button class="btn" style="background:var(--orange); color:white; width:100%;" onclick="document.getElementById('fileInput').click()">📤 Naloži podatke</button>
+            <input type="file" id="fileInput" style="display:none" onchange="handleFileUpload(this)">
         </div>
+        <div id="settingsList" class="progress-section" style="margin-top:15px;"></div>
+        <button class="btn" style="background:var(--green); color:white; width:100%;" onclick="openGoalModal()">➕ Dodaj nov cilj</button>
     </div>
 
     <div class="nav-bar">
         <div class="nav-item active" onclick="goTab('calendar')"><span class="nav-icon">📊</span> Koledar</div>
+        <div class="nav-item" onclick="goTab('analytics')"><span class="nav-icon">📈</span> Analiza</div>
         <div class="nav-item" onclick="goTab('races')"><span class="nav-icon">🏆</span> Tekme</div>
         <div class="nav-item" onclick="goTab('settings')"><span class="nav-icon">⚙️</span> Nastavitve</div>
     </div>
 
-    <div class="modal-overlay" id="entryModal">
+    <div id="entryModal" class="modal-overlay">
         <div class="modal-box">
-            <h2 id="modalDateTitle" style="text-align:center; margin-top:0;">Vnos</h2>
-            <div class="inp-group"><label>🏃‍♀️ Tek (km)</label><input type="number" id="inpRun" step="0.01" placeholder="0.0"></div>
-            <div class="inp-group"><label>⛰️ Višinci (m)</label><input type="number" id="inpElev" step="1" placeholder="0"></div>
-            <div class="modal-btns">
-                <button class="btn" style="background:#ecf0f1; color:#333;" onclick="closeModal('entryModal')">Prekliči</button>
-                <button class="btn" style="background:var(--green); color:white;" onclick="saveData()">Shrani</button>
+            <h2 id="modalDateTitle">Vnos</h2>
+            <div class="type-selector">
+                <div class="type-opt selected" onclick="selectType('run', this)">🏃‍♀️</div>
+                <div class="type-opt" onclick="selectType('bike', this)">🚴‍♀️</div>
+                <div class="type-opt" onclick="selectType('hike', this)">⛰️</div>
+                <div class="type-opt" onclick="selectType('other', this)">🏊</div>
             </div>
+            <input type="hidden" id="inpType" value="run">
+            <div class="inp-group"><label>Razdalja (km)</label><input type="number" id="inpRun" step="0.01"></div>
+            <div class="inp-group"><label>Višinci (m)</label><input type="number" id="inpElev" step="1"></div>
+            <div class="modal-btns"><button class="btn" onclick="closeModal('entryModal')">Zapri</button><button class="btn" style="background:var(--green);color:white;" onclick="saveData()">Shrani</button></div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="backupModal">
+    <div id="addGoalModal" class="modal-overlay">
         <div class="modal-box">
-            <h2 id="backupTitle" style="text-align:center; margin-top:0;">Backup</h2>
-            <p style="font-size:0.8rem; color:#666;" id="backupDesc"></p>
-            <textarea id="backupText" class="backup-text" readonly></textarea>
-            <div class="modal-btns">
-                <button class="btn" style="background:#ecf0f1; color:#333;" onclick="closeModal('backupModal')">Zapri</button>
-                <button class="btn" style="background:#3498db; color:white;" id="backupActionBtn" onclick="performImport()">Kopiraj</button>
-            </div>
+            <h2 id="goalModalTitle">Cilj</h2>
+            <div class="inp-group"><input type="text" id="newGoalName" placeholder="Ime cilja"></div>
+            <div class="inp-group"><input type="number" id="newGoalTarget" placeholder="Vrednost"></div>
+            <div class="inp-group"><select id="newGoalUnit"><option value="km">km</option><option value="m">m</option></select></div>
+            <div class="inp-group"><select id="newGoalType"><option value="Letni">Letni</option><option value="Mesecni">Mesečni</option></select></div>
+            <div class="inp-group"><input type="color" id="newGoalColor"></div>
+            <div class="modal-btns"><button class="btn" onclick="closeModal('addGoalModal')">Zapri</button><button class="btn" style="background:var(--green);color:white;" id="goalModalBtn" onclick="saveGoalFromModal()">Shrani</button></div>
+        </div>
+    </div>
+
+    <div id="addRaceModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>Nova Tekma</h2>
+            <div class="inp-group"><input type="text" id="raceName" placeholder="Ime tekme"></div>
+            <div class="inp-group"><input type="date" id="raceDate"></div>
+            <div class="inp-group"><input type="number" id="raceDist" placeholder="Razdalja km"></div>
+            <div class="modal-btns"><button class="btn" onclick="closeModal('addRaceModal')">Zapri</button><button class="btn" style="background:var(--green);color:white;" onclick="saveRace()">Dodaj</button></div>
         </div>
     </div>
 
     <script>
-        // --- LOGIKA ---
-        const YEAR = 2026;
-        const MONTH = 0; 
-        const DAYS_IN_MONTH = 31;
-        const DAYS_IN_YEAR = 365;
-        const TODAY = new Date(); 
+        // --- DATA & STATE ---
+        const YEAR = 2026; const MONTH = 0; const TODAY = new Date();
         const WEEKDAYS = ["NE", "PO", "TO", "SR", "ČE", "PE", "SO"];
-
-        const DEFAULT_GOALS = [
-            { id: 'g1', name: 'Letni Plan', goal: 2500, unit: 'km', color: '#f1c40f', type: 'Letni', show: true },
-            { id: 'g2', name: 'Strava Izziv', goal: 300, unit: 'km', color: '#FC4C02', type: 'Mesecni', show: true },
-            { id: 'g3', name: 'Hribi', goal: 80000, unit: 'm', color: '#8e44ad', type: 'Letni', show: false }
-        ];
-
+        
         let appData = JSON.parse(localStorage.getItem('myRunnerData_v2')) || {};
-        let userGoals = JSON.parse(localStorage.getItem('myRunnerGoals_v2')) || DEFAULT_GOALS;
+        let userGoals = JSON.parse(localStorage.getItem('myRunnerGoals_v2')) || [];
+        let myRaces = JSON.parse(localStorage.getItem('myRunnerRaces_v2')) || [];
         let settings = JSON.parse(localStorage.getItem('myRunnerSettings_v2')) || { subMonth: true, subWeek: true, viewMode: 'grid' };
-        let editingKey = null;
+        let editingKey = null; let editingGoalIndex = null;
 
-        function init() {
+        // --- FUNCTIONS (Definirane pred klicem) ---
+        function forceSave() {
+            localStorage.setItem('myRunnerData_v2', JSON.stringify(appData));
+            localStorage.setItem('myRunnerGoals_v2', JSON.stringify(userGoals));
+            localStorage.setItem('myRunnerRaces_v2', JSON.stringify(myRaces));
+            localStorage.setItem('myRunnerSettings_v2', JSON.stringify(settings));
+        }
+
+        function toggleViewMode() { 
+            settings.viewMode = settings.viewMode === 'grid' ? 'list' : 'grid'; 
+            forceSave(); applyViewMode(); renderCalendar(); 
+        }
+
+        function applyViewMode() { 
+            const wrap = document.getElementById('calendarWrap'); 
+            const btn = document.getElementById('viewBtn'); 
+            if(settings.viewMode === 'list') { wrap.className = 'calendar-wrap mode-list'; btn.innerText = '📅'; } 
+            else { wrap.className = 'calendar-wrap mode-grid'; btn.innerText = '📜'; } 
+        }
+
+        function goTab(t) { 
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active')); 
+            document.getElementById('tab-'+t).classList.add('active'); 
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            if(t === 'analytics') renderAnalytics();
+        }
+
+        function renderCalendar() {
+            const body = document.getElementById('calendarBody'); body.innerHTML = '';
+            let firstDay = new Date(YEAR, MONTH, 1).getDay(); let offset = (firstDay === 0 ? 6 : firstDay - 1);
+            if(settings.viewMode === 'grid') {
+                for(let i=0; i<offset; i++) { let d=document.createElement('div'); d.className='day-cell'; d.style.background='#fcfcfc'; body.appendChild(d); }
+            }
+            let sumY = 0, sumM = 0;
+            for(let day=1; day<=31; day++) {
+                let key = `${YEAR}-${MONTH+1}-${day}`;
+                let entry = appData[key] || { type: 'run', run: 0, elev: 0 };
+                let cell = document.createElement('div'); cell.className = 'day-cell';
+                if(day === TODAY.getDate()) cell.classList.add('is-today');
+                cell.onclick = () => openModal(day);
+                
+                let icon = entry.run > 0 && entry.type !== 'run' ? ACTIVITY_ICONS[entry.type] : '';
+                
+                if(settings.viewMode === 'grid') {
+                    cell.innerHTML = `<div class="day-num">${day}</div><div class="dots-wrap"></div>`;
+                    if(entry.run > 0) cell.querySelector('.dots-wrap').innerHTML = `<div class="dot-row">${icon}${entry.run}</div>`;
+                    if(entry.elev > 0) cell.querySelector('.dots-wrap').innerHTML += `<div class="dot-row" style="color:var(--purple)">${entry.elev}m</div>`;
+                } else {
+                    let dDate = new Date(YEAR, MONTH, day);
+                    cell.innerHTML = `<div class="day-left-col"><div class="day-num">${day}</div><div class="day-weekday">${WEEKDAYS[dDate.getDay()]}</div></div><div class="dots-wrap"></div>`;
+                    if(entry.run > 0) cell.querySelector('.dots-wrap').innerHTML = `<div class="list-row">${icon} ${entry.run} km</div>`;
+                    if(entry.elev > 0) cell.querySelector('.dots-wrap').innerHTML += `<div class="list-row" style="color:var(--purple)">⛰️ ${entry.elev} m</div>`;
+                }
+                body.appendChild(cell);
+                if(entry.type === 'run') { sumY += (entry.run || 0); sumM += (entry.run || 0); }
+            }
+        }
+
+        function renderProgress() {
+            const container = document.getElementById('progressSection'); container.innerHTML = '<div class="sec-title">NAPREDEK</div>';
+            let stats = { runY: 0, runM: 0 };
+            Object.keys(appData).forEach(k => {
+                let v = appData[k]; if(!v.type || v.type === 'run') { stats.runY += (v.run||0); }
+            });
+            userGoals.forEach(g => {
+                let cur = stats.runY; let avg = g.goal/365; let days = TODAY.getDate();
+                container.innerHTML += `<div class="bar-group"><b>${g.name}</b><div class="bar-track"><div class="bar-fill" style="width:${Math.min(100, (cur/g.goal)*100)}%; background:${g.color}"></div></div></div>`;
+            });
+        }
+
+        function renderAnalytics() {
+            let maxD = 0, totalR = 0;
+            Object.values(appData).forEach(v => { if(v.run > maxD) maxD = v.run; if(!v.type || v.type === 'run') totalR += v.run; });
+            document.getElementById('statMaxDist').innerText = maxD + " km";
+            document.getElementById('statTotalDist').innerText = totalR.toFixed(1) + " km";
+        }
+
+        function openModal(d) { editingKey = `${YEAR}-${MONTH+1}-${d}`; let v = appData[editingKey] || {run:'', elev:'', type:'run'}; document.getElementById('inpRun').value = v.run; document.getElementById('inpElev').value = v.elev; document.getElementById('entryModal').style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+        function selectType(t, el) { document.getElementById('inpType').value = t; document.querySelectorAll('.type-opt').forEach(x => x.classList.remove('selected')); el.classList.add('selected'); }
+        function saveData() { let r = parseFloat(document.getElementById('inpRun').value) || 0; let e = parseInt(document.getElementById('inpElev').value) || 0; if(r > 0 || e > 0) appData[editingKey] = {run:r, elev:e, type:document.getElementById('inpType').value}; else delete appData[editingKey]; forceSave(); closeModal('entryModal'); renderCalendar(); renderProgress(); }
+        
+        function openGoalModal() { document.getElementById('addGoalModal').style.display = 'flex'; }
+        function saveGoalFromModal() { let n = document.getElementById('newGoalName').value; let t = parseFloat(document.getElementById('newGoalTarget').value); if(n && t) { userGoals.push({name:n, goal:t, color:document.getElementById('newGoalColor').value, unit:'km', type:'Letni', show:true}); forceSave(); closeModal('addGoalModal'); location.reload(); } }
+        function renderSettings() { let s = document.getElementById('settingsList'); s.innerHTML = ''; userGoals.forEach((g,i) => { s.innerHTML += `<div class="goal-list-item"><span>${g.name}</span><button class="btn-delete" onclick="deleteGoal(${i})">🗑️</button></div>`; }); }
+        function deleteGoal(i) { userGoals.splice(i,1); forceSave(); location.reload(); }
+
+        function downloadBackup() { 
+            const b = JSON.stringify({data:appData, goals:userGoals, races:myRaces, settings:settings});
+            const blob = new Blob([b], {type:'application/json'});
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'planer_backup.json'; a.click();
+        }
+        function handleFileUpload(input) {
+            const reader = new FileReader(); reader.onload = (e) => {
+                const b = JSON.parse(e.target.result); appData=b.data; userGoals=b.goals; myRaces=b.races; forceSave(); location.reload();
+            }; reader.readAsText(input.files[0]);
+        }
+
+        // --- INIT ---
+        window.onload = function() {
             applyViewMode();
             renderCalendar();
             renderProgress();
             renderSettings();
-            document.getElementById('toggleSubMonth').checked = settings.subMonth;
-            document.getElementById('toggleSubWeek').checked = settings.subWeek;
-        }
-
-        // --- POGLED (GRID / LIST) ---
-        function toggleViewMode() {
-            settings.viewMode = settings.viewMode === 'grid' ? 'list' : 'grid';
-            localStorage.setItem('myRunnerSettings_v2', JSON.stringify(settings));
-            applyViewMode(); renderCalendar();
-        }
-        function applyViewMode() {
-            const wrap = document.getElementById('calendarWrap');
-            const btn = document.getElementById('viewBtn');
-            if(settings.viewMode === 'list') { wrap.className = 'calendar-wrap mode-list'; btn.innerText = '📅'; } 
-            else { wrap.className = 'calendar-wrap mode-grid'; btn.innerText = '📜'; }
-        }
-
-        // --- CALENDAR RENDER ---
-        function renderCalendar() {
-            const body = document.getElementById('calendarBody'); body.innerHTML = '';
-            let firstDay = new Date(YEAR, MONTH, 1).getDay();
-            let offset = firstDay === 0 ? 6 : firstDay - 1;
-
-            if(settings.viewMode === 'grid') {
-                for(let i=0; i<offset; i++) {
-                    let d = document.createElement('div'); d.className = 'day-cell'; d.style.background = '#fcfcfc'; d.style.cursor = 'default'; body.appendChild(d);
-                }
-            }
-
-            let sumRunYear = 0, sumRunMonth = 0;
-            
-            for(let day=1; day<=DAYS_IN_MONTH; day++) {
-                let cell = document.createElement('div'); cell.className = 'day-cell';
-                if(day === TODAY.getDate() && MONTH === TODAY.getMonth()) cell.classList.add('is-today');
-                
-                cell.onclick = () => openModal(day);
-                let currentDayDate = new Date(YEAR, MONTH, day);
-                let dayName = WEEKDAYS[currentDayDate.getDay()];
-                cell.innerHTML = `<div class="day-num">${day}${settings.viewMode==='list' ? `<div class="day-weekday">${dayName}</div>` : ''}</div>`;
-
-                let key = getKey(day);
-                let entry = appData[key] || { run: 0, elev: 0 };
-                let val = entry.run;
-                let dotsDiv = document.createElement('div'); dotsDiv.className = 'dots-wrap';
-
-                userGoals.forEach(g => {
-                    if(g.unit === 'm') return; 
-                    let dailyAvg = g.type === 'Letni' ? g.goal/DAYS_IN_YEAR : g.goal/DAYS_IN_MONTH;
-                    let accumPrevious = g.type === 'Letni' ? sumRunYear : sumRunMonth;
-                    let targetCumul = dailyAvg * day;
-                    let bankingGoal = targetCumul - accumPrevious;
-                    if(bankingGoal < 0) bankingGoal = 0;
-                    let isDone = val >= bankingGoal - 0.05;
-                    
-                    let row = document.createElement('div'); row.className = 'dot-row';
-                    let dot = document.createElement('div'); dot.className = 'dot';
-                    let txt = document.createElement('span'); txt.className = 'val-text';
-
-                    if(day <= TODAY.getDate()) {
-                        if(val > 0 || day === TODAY.getDate()) {
-                            if(isDone) dot.style.backgroundColor = g.color; else dot.style.border = `2px solid ${g.color}`;
-                            txt.innerText = `${val.toFixed(1)} / ${bankingGoal.toFixed(1)}`;
-                            if(isDone) txt.classList.add('txt-green'); else txt.classList.add('txt-red');
-                            if(settings.viewMode === 'list') { 
-                                let label = document.createElement('span'); label.className = 'goal-label'; label.innerText = g.name; label.style.color = g.color; row.append(label); txt.innerText += " km";
-                            }
-                            row.append(dot, txt);
-                        }
-                    } else if (day === TODAY.getDate() + 1) {
-                         dot.style.backgroundColor = '#ecf0f1';
-                         let accumForTomorrow = accumPrevious + val;
-                         let targetTomorrowCumul = dailyAvg * day;
-                         let diff = accumForTomorrow - targetTomorrowCumul; 
-                         let labelTxt = diff >= 0 ? `V dobro: ${diff.toFixed(1)}` : `Cilj: ${Math.abs(diff).toFixed(1)}`;
-                         if(diff >= 0) txt.classList.add('txt-green'); else txt.classList.add('txt-orange');
-                         if(settings.viewMode === 'list') { let l = document.createElement('span'); l.className='goal-label'; l.innerText=g.name; row.append(l); }
-                         txt.innerText = labelTxt; row.append(dot, txt);
-                    } else {
-                        if(settings.viewMode === 'grid') { dot.style.backgroundColor = '#ecf0f1'; row.appendChild(dot); }
-                    }
-                    if(row.hasChildNodes()) dotsDiv.appendChild(row);
-                });
-
-                if(entry.elev > 0) {
-                    let h = document.createElement('div');
-                    h.style.color = '#8e44ad'; h.style.fontWeight='bold'; 
-                    h.style.fontSize = settings.viewMode==='list' ? '0.9rem' : '0.6rem';
-                    h.style.paddingLeft = settings.viewMode==='list' ? '0' : '2px';
-                    h.style.marginTop = settings.viewMode==='list' ? '5px' : '0';
-                    h.innerText = Math.round(entry.elev) + ' m';
-                    dotsDiv.appendChild(h);
-                }
-                cell.appendChild(dotsDiv); body.appendChild(cell);
-                sumRunYear += val; sumRunMonth += val;
-            }
-        }
-
-        // --- PROGRESS ---
-        function renderProgress() {
-            const container = document.getElementById('progressSection'); container.innerHTML = '<div class="sec-title">NAPREDEK</div>';
-            let sumRunYear = 0, sumElevYear = 0, sumRunMonth = 0, sumRunWeek = 0;
-            let curWeek = getISOWeek(TODAY);
-            Object.keys(appData).forEach(k => {
-                let v = appData[k]; let d = new Date(k);
-                sumRunYear += (v.run||0); sumElevYear += (v.elev||0);
-                if(d.getMonth()===MONTH) sumRunMonth += (v.run||0);
-                if(getISOWeek(d)===curWeek) sumRunWeek += (v.run||0);
-            });
-            let dayYr = Math.floor((TODAY - new Date(YEAR, 0, 0)) / 86400000); let dayMo = TODAY.getDate(); let dayWk = TODAY.getDay() || 7;
-            userGoals.forEach(g => {
-                if(!g.show) return;
-                let cur = g.unit==='m'? sumElevYear : (g.type==='Letni'? sumRunYear: sumRunMonth);
-                let days = g.type==='Letni'? dayYr : dayMo;
-                let tot = g.type==='Letni'? DAYS_IN_YEAR : DAYS_IN_MONTH;
-                let avg = g.goal/tot;
-                createBar(container, g.name, cur, g.goal, g.color, g.unit, avg*days);
-                if(settings.subMonth && g.type==='Letni') createBar(container, g.name+' (Ta mesec)', sumRunMonth, avg*DAYS_IN_MONTH, g.color, g.unit, avg*dayMo, true);
-                if(settings.subWeek) {
-                   let activeDays = curWeek===1 ? 4 : 7; let daysSoFar = curWeek===1 ? Math.max(0, dayWk-3) : dayWk;
-                   createBar(container, g.name+' (Ta teden)', sumRunWeek, avg*activeDays, g.color, g.unit, avg*daysSoFar, true);
-                }
-            });
-        }
-        function createBar(el, name, val, max, col, unit, mark, sub=false) {
-            let pct = Math.min((val/max)*100, 100); let markPct = Math.min((mark/max)*100, 100);
-            let diff = val - mark; let diffTxt = (diff>=0?"+":"") + diff.toFixed(1) + " " + unit;
-            let html = `<div class="bar-group" style="${sub?'padding-left:10px':''}"><div class="bar-header"><span style="font-weight:${sub?'normal':'bold'}">${name}</span><span>${val.toFixed(1)} / ${max.toFixed(0)}</span></div><div class="bar-track"><div class="bar-fill" style="width:${pct}%; background:${col}"></div><div class="bar-marker" style="left:${markPct}%"></div></div><div class="bar-status ${diff>=0?'txt-green':'txt-red'}">Stanje: ${diffTxt}</div></div>`;
-            el.innerHTML += html;
-        }
-
-        // --- SETTINGS & HELPERS ---
-        function renderSettings() { let s = document.getElementById('settingsList'); s.innerHTML=''; userGoals.forEach((g,i) => { s.innerHTML += `<div class="setting-item"><span style="color:${g.color};font-weight:bold">${g.name}</span><label class="switch"><input type="checkbox" ${g.show?'checked':''} onchange="togGoal(${i})"><span class="slider"></span></label></div>`; }); }
-        function togGoal(i) { userGoals[i].show = !userGoals[i].show; localStorage.setItem('myRunnerGoals_v2', JSON.stringify(userGoals)); renderProgress(); }
-        function toggleGlobal(k) { settings[k] = !settings[k]; localStorage.setItem('myRunnerSettings_v2', JSON.stringify(settings)); renderProgress(); }
-        function goTab(t) { document.querySelectorAll('.page').forEach(e=>e.classList.remove('active')); document.getElementById('tab-'+t).classList.add('active'); document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active')); if(t==='calendar') document.querySelectorAll('.nav-item')[0].classList.add('active'); if(t==='races') document.querySelectorAll('.nav-item')[1].classList.add('active'); if(t==='settings') document.querySelectorAll('.nav-item')[2].classList.add('active'); }
-        function openModal(d) { editingKey = getKey(d); let v = appData[editingKey] || {run:'',elev:''}; document.getElementById('modalDateTitle').innerText=`Vnos: ${d}. Januar`; document.getElementById('inpRun').value=v.run; document.getElementById('inpElev').value=v.elev; document.getElementById('entryModal').style.display='flex'; }
-        function closeModal(id) { document.getElementById(id).style.display='none'; }
-        function saveData() { let r=parseFloat(document.getElementById('inpRun').value)||0; let e=parseFloat(document.getElementById('inpElev').value)||0; if(r>0||e>0) appData[editingKey]={run:r,elev:e}; else delete appData[editingKey]; localStorage.setItem('myRunnerData_v2', JSON.stringify(appData)); closeModal('entryModal'); renderCalendar(); renderProgress(); }
-        function getKey(d) { return `${YEAR}-${MONTH+1}-${d}`; }
-        function getISOWeek(d) { d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate())); d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay()||7)); var yearStart = new Date(Date.UTC(d.getUTCFullYear(),0,1)); return Math.ceil((((d - yearStart) / 86400000) + 1)/7); }
-
-        // --- BACKUP SYSTEM ---
-        function openBackupModal(type) {
-            document.getElementById('backupModal').style.display = 'flex';
-            const textArea = document.getElementById('backupText');
-            const btn = document.getElementById('backupActionBtn');
-            const title = document.getElementById('backupTitle');
-            const desc = document.getElementById('backupDesc');
-
-            if(type === 'export') {
-                title.innerText = "Izvozi podatke";
-                desc.innerText = "Kopiraj to kodo in jo shrani na varno:";
-                const backupData = { data: appData, goals: userGoals, settings: settings };
-                textArea.value = JSON.stringify(backupData);
-                textArea.readOnly = true;
-                btn.innerText = "Kopiraj";
-                btn.onclick = () => {
-                    textArea.select();
-                    document.execCommand('copy');
-                    alert("Kopirano v odložišče!");
-                };
-            } else {
-                title.innerText = "Uvozi podatke";
-                desc.innerText = "Prilepi varnostno kopijo sem:";
-                textArea.value = "";
-                textArea.readOnly = false;
-                btn.innerText = "Uvozi";
-                btn.onclick = () => {
-                    try {
-                        let b = JSON.parse(textArea.value);
-                        if(b.data) {
-                            localStorage.setItem('myRunnerData_v2', JSON.stringify(b.data));
-                            localStorage.setItem('myRunnerGoals_v2', JSON.stringify(b.goals));
-                            localStorage.setItem('myRunnerSettings_v2', JSON.stringify(b.settings));
-                            location.reload();
-                        } else alert("Neveljavni podatki!");
-                    } catch(e) { alert("Napaka pri branju kode!"); }
-                };
-            }
-        }
-
-        init();
+        };
     </script>
 </body>
 </html>
